@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>校园闲置铺 - 分类入口</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper: #fffdf5;
+      --ink: #000000;
+      --red: #ff6b6b;
+      --yellow: #ffd93d;
+      --violet: #c4b5fd;
+      --white: #ffffff;
+      --shadow-sm: 4px 4px 0 0 var(--ink);
+      --shadow-md: 8px 8px 0 0 var(--ink);
+      --shadow-lg: 12px 12px 0 0 var(--ink);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "Space Grotesk", "Microsoft YaHei", "PingFang SC", "Heiti SC", sans-serif;
+      font-weight: 700;
+      background-color: var(--paper);
+      background-image:
+        linear-gradient(to right, rgba(0, 0, 0, 0.1) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+      background-size: 40px 40px;
+      overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    a {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .page {
+      min-height: 100vh;
+      padding: 24px;
+      position: relative;
+    }
+
+    .page::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.16;
+      background-image: radial-gradient(var(--ink) 1.5px, transparent 1.5px);
+      background-size: 22px 22px;
+      mask-image: linear-gradient(120deg, transparent 0%, #000 35%, transparent 78%);
+    }
+
+    .shell {
+      max-width: 1240px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 14px;
+      border: 4px solid var(--ink);
+      background: var(--white);
+      box-shadow: var(--shadow-md);
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      min-height: 52px;
+      padding: 0 18px;
+      border: 4px solid var(--ink);
+      background: var(--yellow);
+      box-shadow: var(--shadow-sm);
+      font-size: clamp(18px, 3vw, 28px);
+      font-weight: 900;
+      letter-spacing: 0;
+      white-space: nowrap;
+      transform: rotate(-1deg);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .neo-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 50px;
+      padding: 0 16px;
+      border: 4px solid var(--ink);
+      background: var(--white);
+      box-shadow: var(--shadow-sm);
+      color: var(--ink);
+      font: inherit;
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: 0;
+      cursor: pointer;
+      transition: transform 120ms linear, box-shadow 120ms linear, background-color 120ms linear;
+    }
+
+    .neo-button:hover {
+      background: var(--yellow);
+      transform: translate(-1px, -1px);
+      box-shadow: 6px 6px 0 0 var(--ink);
+    }
+
+    .neo-button:active {
+      transform: translate(3px, 3px);
+      box-shadow: none;
+    }
+
+    .neo-button:focus-visible,
+    .category-card:focus-visible {
+      outline: 4px solid var(--ink);
+      outline-offset: 4px;
+    }
+
+    .neo-button.primary {
+      background: var(--red);
+    }
+
+    .neo-button.profile {
+      background: var(--violet);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      gap: 32px;
+      align-items: center;
+      margin-top: 44px;
+      padding: clamp(24px, 6vw, 56px);
+      border: 4px solid var(--ink);
+      background: var(--yellow);
+      box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -18px;
+      top: -18px;
+      width: 74px;
+      height: 74px;
+      border: 4px solid var(--ink);
+      background: var(--red);
+      box-shadow: var(--shadow-sm);
+      transform: rotate(12deg);
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 850px;
+      font-size: clamp(52px, 9vw, 112px);
+      line-height: 0.92;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .title-chip {
+      display: inline-block;
+      padding: 0 14px 8px;
+      border: 4px solid var(--ink);
+      background: var(--red);
+      box-shadow: var(--shadow-md);
+      transform: rotate(-2deg);
+    }
+
+    .title-chip.alt {
+      background: var(--violet);
+      transform: rotate(1.5deg);
+    }
+
+    .subtitle {
+      margin: 28px 0 0;
+      max-width: 580px;
+      font-size: clamp(20px, 3vw, 32px);
+      line-height: 1.25;
+      font-weight: 900;
+    }
+
+    .hero-art {
+      aspect-ratio: 1;
+      border: 4px solid var(--ink);
+      background:
+        radial-gradient(circle, var(--ink) 2px, transparent 2.5px) 0 0 / 26px 26px,
+        var(--white);
+      box-shadow: var(--shadow-md);
+      position: relative;
+      transform: rotate(2deg);
+    }
+
+    .hero-art span {
+      position: absolute;
+      display: grid;
+      place-items: center;
+      border: 4px solid var(--ink);
+      box-shadow: var(--shadow-sm);
+      font-size: 44px;
+      font-weight: 900;
+    }
+
+    .shape-book {
+      left: 26px;
+      top: 28px;
+      width: 96px;
+      height: 112px;
+      background: var(--violet);
+      transform: rotate(-8deg);
+    }
+
+    .shape-phone {
+      right: 28px;
+      top: 64px;
+      width: 88px;
+      height: 132px;
+      background: var(--red);
+      transform: rotate(8deg);
+    }
+
+    .shape-bag {
+      left: 64px;
+      bottom: 28px;
+      width: 138px;
+      height: 86px;
+      background: var(--yellow);
+      transform: rotate(4deg);
+    }
+
+    .categories-section {
+      margin-top: 48px;
+      padding: 24px 0 18px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    h2 {
+      margin: 0;
+      display: inline-block;
+      padding: 8px 16px;
+      border: 4px solid var(--ink);
+      background: var(--white);
+      box-shadow: var(--shadow-sm);
+      font-size: clamp(24px, 4vw, 46px);
+      line-height: 1;
+      font-weight: 900;
+      transform: rotate(-1deg);
+    }
+
+    .scroll-controls {
+      display: flex;
+      gap: 10px;
+    }
+
+    .icon-button {
+      width: 52px;
+      min-width: 52px;
+      padding: 0;
+      font-size: 28px;
+    }
+
+    .category-scroll {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(210px, 260px);
+      gap: 22px;
+      overflow-x: auto;
+      overscroll-behavior-inline: contain;
+      scroll-snap-type: inline mandatory;
+      scroll-padding-inline: 8px;
+      padding: 10px 14px 26px 4px;
+      scrollbar-width: thick;
+      scrollbar-color: var(--ink) var(--paper);
+    }
+
+    .category-scroll::-webkit-scrollbar {
+      height: 18px;
+    }
+
+    .category-scroll::-webkit-scrollbar-track {
+      border: 4px solid var(--ink);
+      background: var(--white);
+    }
+
+    .category-scroll::-webkit-scrollbar-thumb {
+      border: 4px solid var(--ink);
+      background: var(--red);
+    }
+
+    .category-card {
+      min-height: 190px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 4px solid var(--ink);
+      background: var(--white);
+      box-shadow: var(--shadow-md);
+      scroll-snap-align: start;
+      padding: 18px;
+      transition: transform 160ms linear, box-shadow 160ms linear;
+    }
+
+    .category-card:nth-child(1),
+    .category-card:nth-child(5) {
+      background: var(--yellow);
+      transform: rotate(-1deg);
+    }
+
+    .category-card:nth-child(2),
+    .category-card:nth-child(6) {
+      background: var(--red);
+      transform: rotate(1deg);
+    }
+
+    .category-card:nth-child(3),
+    .category-card:nth-child(7) {
+      background: var(--violet);
+      transform: rotate(-0.5deg);
+    }
+
+    .category-card:nth-child(4),
+    .category-card:nth-child(8) {
+      background: var(--white);
+      transform: rotate(1.5deg);
+    }
+
+    .category-card:hover {
+      transform: translateY(-8px) rotate(0deg);
+      box-shadow: 14px 14px 0 0 var(--ink);
+    }
+
+    .category-icon {
+      width: 64px;
+      height: 64px;
+      display: grid;
+      place-items: center;
+      border: 4px solid var(--ink);
+      background: var(--white);
+      box-shadow: var(--shadow-sm);
+      font-size: 34px;
+      line-height: 1;
+    }
+
+    .category-name {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 38px);
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    @media (max-width: 780px) {
+      .page {
+        padding: 14px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .nav-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+
+      .neo-button {
+        min-height: 48px;
+        padding: 0 8px;
+        font-size: 13px;
+      }
+
+      .hero {
+        grid-template-columns: 1fr;
+        margin-top: 28px;
+      }
+
+      .hero-art {
+        min-height: 220px;
+      }
+
+      .section-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .scroll-controls {
+        align-self: flex-end;
+      }
+
+      .category-scroll {
+        grid-auto-columns: minmax(184px, 72vw);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .nav-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .logo {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="shell">
+      <header class="topbar" aria-label="网站顶部导航">
+        <a class="logo" href="./campus-exchange-home.html" aria-label="返回首页">校园闲置铺</a>
+        <nav class="nav-actions" aria-label="主要功能">
+          <a class="neo-button" href="./search.html">搜索</a>
+          <a class="neo-button primary" href="./login.html?next=publish.html">发布商品</a>
+          <a class="neo-button profile" href="./login.html?next=profile.html">用户个人中心</a>
+        </nav>
+      </header>
+
+      <main>
+        <section class="hero" aria-labelledby="home-title">
+          <div>
+            <h1 id="home-title">
+              <span class="title-chip">校园闲置</span><br>
+              <span class="title-chip alt">不闲着</span>
+            </h1>
+            <p class="subtitle">来校园闲置铺，去发现校园里的好物</p>
+          </div>
+          <div class="hero-art" aria-hidden="true">
+            <span class="shape-book">牛</span>
+            <span class="shape-phone">牛</span>
+            <span class="shape-bag">牛</span>
+          </div>
+        </section>
+
+        <section class="categories-section" aria-labelledby="category-title">
+          <div class="section-head">
+            <h2 id="category-title">分类频道</h2>
+            <div class="scroll-controls" aria-label="分类滚动控制">
+              <button class="neo-button icon-button" type="button" data-scroll="left" aria-label="向左滚动分类">←</button>
+              <button class="neo-button icon-button" type="button" data-scroll="right" aria-label="向右滚动分类">→</button>
+            </div>
+          </div>
+
+          <div class="category-scroll" id="categoryScroll" aria-label="商品分类横向列表">
+            <a class="category-card" href="./category.html?category=textbooks" aria-label="进入教材资料分类">
+              <span class="category-icon" aria-hidden="true">📚</span>
+              <p class="category-name">教材资料</p>
+            </a>
+            <a class="category-card" href="./category.html?category=digital" aria-label="进入数码电子分类">
+              <span class="category-icon" aria-hidden="true">⌨</span>
+              <p class="category-name">数码电子</p>
+            </a>
+            <a class="category-card" href="./category.html?category=living" aria-label="进入生活用品分类">
+              <span class="category-icon" aria-hidden="true">☕</span>
+              <p class="category-name">生活用品</p>
+            </a>
+            <a class="category-card" href="./category.html?category=clothing" aria-label="进入服饰鞋包分类">
+              <span class="category-icon" aria-hidden="true">◉</span>
+              <p class="category-name">服饰鞋包</p>
+            </a>
+            <a class="category-card" href="./category.html?category=sports" aria-label="进入运动户外分类">
+              <span class="category-icon" aria-hidden="true">★</span>
+              <p class="category-name">运动户外</p>
+            </a>
+            <a class="category-card" href="./category.html?category=furniture" aria-label="进入宿舍家具分类">
+              <span class="category-icon" aria-hidden="true">▣</span>
+              <p class="category-name">宿舍家具</p>
+            </a>
+            <a class="category-card" href="./category.html?category=tools" aria-label="进入文具工具分类">
+              <span class="category-icon" aria-hidden="true">✎</span>
+              <p class="category-name">文具工具</p>
+            </a>
+            <a class="category-card" href="./category.html?category=other" aria-label="进入其他闲置分类">
+              <span class="category-icon" aria-hidden="true">＋</span>
+              <p class="category-name">其他闲置</p>
+            </a>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const categoryScroll = document.querySelector("#categoryScroll");
+    const scrollButtons = document.querySelectorAll("[data-scroll]");
+
+    scrollButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const direction = button.dataset.scroll === "left" ? -1 : 1;
+        categoryScroll.scrollBy({
+          left: direction * Math.min(360, categoryScroll.clientWidth * 0.82),
+          behavior: "smooth"
+        });
+      });
+    });
+
+    categoryScroll.addEventListener("wheel", (event) => {
+      if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
+        event.preventDefault();
+        categoryScroll.scrollLeft += event.deltaY;
+      }
+    }, { passive: false });
+  </script>
+</body>
+</html>

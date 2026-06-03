@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>搜索商品 - 校园闲置铺</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body data-page="search">
+  <div class="page"><div class="shell">
+    <header class="topbar"><a class="logo" href="index.html">校园闲置铺</a><nav class="nav-actions"><a class="btn primary" href="publish.html">发布商品</a><a class="btn secondary" href="profile.html">用户个人中心</a></nav></header>
+    <main class="section">
+      <h1><span class="chip">搜索商品</span></h1>
+      <form class="form" id="searchForm">
+        <label>关键词<input id="keyword" placeholder="例如：教材、耳机、台灯"></label>
+        <label>分类<select id="category"><option value="">全部分类</option><option value="textbooks">教材资料</option><option value="digital">数码电子</option><option value="living">生活用品</option><option value="clothing">服饰鞋包</option><option value="sports">运动户外</option><option value="furniture">宿舍家具</option><option value="tools">文具工具</option><option value="other">其他闲置</option></select></label>
+        <button class="btn primary" type="submit">搜索</button>
+      </form>
+      <section class="section grid" data-products></section>
+    </main>
+  </div></div>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
