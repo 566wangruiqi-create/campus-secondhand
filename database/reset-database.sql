@@ -1,0 +1,3 @@
+-- 最终版数据库重建脚本已合并到 supabase-schema.sql。
+-- 请在 Supabase SQL Editor 中打开并运行 database/supabase-schema.sql。
+-- 不要再运行旧的 profiles/products/ratings/disputes/operation_logs 结构。

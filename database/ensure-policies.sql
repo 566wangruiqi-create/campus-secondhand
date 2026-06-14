@@ -1,0 +1,2 @@
+-- 最终版 8 表的 RLS 策略已包含在 supabase-schema.sql。
+-- 请在 Supabase SQL Editor 中运行 database/supabase-schema.sql。

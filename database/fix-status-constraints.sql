@@ -1,0 +1,2 @@
+-- 旧版状态约束脚本已废弃。
+-- 最终版状态字段使用数字状态码，约束已包含在 database/supabase-schema.sql。

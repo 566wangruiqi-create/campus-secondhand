@@ -6,14 +6,15 @@
   <title>个人中心 - 校园闲置铺</title>
   <link rel="stylesheet" href="assets/css/styles.css">
 </head>
-<body>
+<body data-page="profile">
   <div class="page"><div class="shell">
-    <header class="topbar"><a class="logo" href="index.html">校园闲置铺</a><nav class="nav-actions"><a class="btn" href="search.html">搜索</a><a class="btn primary" href="publish.html">发布商品</a><a class="btn" href="orders.html">我的订单</a></nav></header>
-    <main class="section grid">
-      <section class="card yellow"><h1>个人中心</h1><p>昵称：李同学</p><p>校区：东校区</p><p>评分：4.9</p><p>交易次数：18</p></section>
-      <a class="card red" href="orders.html"><h2>我的订单</h2><p>查看购买、出售、争议订单。</p></a>
-      <a class="card violet" href="publish.html"><h2>发布商品</h2><p>发布新的校园闲置物品。</p></a>
+    <header class="topbar"><a class="logo" href="index.html">校园闲置铺</a><nav class="nav-actions"><a class="btn" href="search.html">搜索</a><a class="btn primary" href="publish.html">发布商品</a></nav></header>
+    <main class="section">
+      <section class="card yellow" data-profile><h1>个人中心</h1><p>正在读取用户信息...</p></section>
+      <section class="section grid" data-profile-orders></section>
     </main>
   </div></div>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/app.js"></script>
 </body>
 </html>

@@ -6,18 +6,20 @@
   <title>提交争议 - 校园闲置铺</title>
   <link rel="stylesheet" href="assets/css/styles.css">
 </head>
-<body>
+<body data-page="dispute">
   <div class="page"><div class="shell">
-    <header class="topbar"><a class="logo" href="index.html">校园闲置铺</a><nav class="nav-actions"><a class="btn" href="orders.html">我的订单</a></nav></header>
+    <header class="topbar"><a class="logo" href="index.html">校园闲置铺</a><nav class="nav-actions"><a class="btn" href="profile.html">个人中心</a></nav></header>
     <main class="section two-col">
-      <section class="card red"><h1>提交争议</h1><p class="lead">订单异常时提交说明，由管理员处理。</p></section>
-      <form class="form" action="orders.html">
-        <label>争议类型<select><option>商品与描述不符</option><option>商品未放到指定地点</option><option>商品损坏</option><option>虚假发布</option><option>订单状态异常</option></select></label>
-        <label>问题说明<textarea required placeholder="请说明发生了什么"></textarea></label>
-        <label>证据图片<input type="file" accept="image/*"></label>
-        <button class="btn primary full">提交给管理员</button>
+      <section class="card red"><h1>提交争议</h1><p class="lead">交易异常时提交说明，管理员会在后台处理。</p></section>
+      <form class="form" id="disputeForm">
+        <label>订单编号<input name="order_id" required readonly></label>
+        <label>问题说明<textarea name="reason" required placeholder="请说明发生了什么"></textarea></label>
+        <label>证据链接<input name="evidence" placeholder="可填写图片或文件链接"></label>
+        <button class="btn primary full" type="submit">提交给管理员</button>
       </form>
     </main>
   </div></div>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/app.js"></script>
 </body>
 </html>

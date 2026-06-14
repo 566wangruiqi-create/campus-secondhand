@@ -13,29 +13,29 @@
         <a class="logo" href="index.html">校园闲置铺</a>
         <nav class="nav-actions">
           <a class="btn" href="search.html">搜索</a>
-          <a class="btn primary" href="login.html?next=publish.html">发布商品</a>
-          <a class="btn secondary" href="login.html?next=profile.html">用户个人中心</a>
-          <a class="btn admin-link" href="admin-dashboard.html">管理员</a>
+          <a class="btn primary" href="publish.html">发布商品</a>
+          <a class="btn secondary" href="profile.html" data-user-center>用户个人中心</a>
+          <a class="btn admin-link" href="admin-login.html">管理员</a>
         </nav>
       </header>
       <main>
         <section class="hero">
           <div>
-            <h1><span class="chip">校园闲置</span><br><span class="chip alt">不闲着</span></h1>
-            <p class="lead">选择分类，去发现校园里的好物</p>
+            <h1><span class="chip">校园闲置铺</span><br><span class="chip alt">苏州城市学院</span></h1>
+            <p class="lead">校园闲置铺，一个发现校园里的好物的地方</p>
           </div>
           <div class="hero-art" aria-hidden="true">
-            <span class="shape-a">书</span>
-            <span class="shape-b">机</span>
-            <span class="shape-c">包</span>
+            <span class="shape-a">苏州</span>
+            <span class="shape-b">城市</span>
+            <span class="shape-c">学院</span>
           </div>
         </section>
         <section class="section">
           <div class="section-head">
-            <h2 class="title-box">选择分类</h2>
+            <h2 class="title-box">分类频道</h2>
             <div class="nav-actions">
-              <button class="btn" type="button" data-scroll="left">←</button>
-              <button class="btn" type="button" data-scroll="right">→</button>
+              <button class="btn" type="button" data-scroll="left">左</button>
+              <button class="btn" type="button" data-scroll="right">右</button>
             </div>
           </div>
           <div class="category-scroll" data-categories></div>
@@ -43,6 +43,7 @@
       </main>
     </div>
   </div>
+  <script src="assets/js/config.js"></script>
   <script src="assets/js/app.js"></script>
 </body>
 </html>

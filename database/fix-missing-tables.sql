@@ -1,0 +1,3 @@
+-- 旧版补表脚本已废弃。
+-- 最终版只保留 user/admin/category/goods/goods_image/payment/orders/dispute 8 张表。
+-- 请运行 database/supabase-schema.sql。

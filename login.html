@@ -3,21 +3,24 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>登录 - 校园闲置铺</title>
+  <title>用户登录 - 校园闲置铺</title>
   <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
   <div class="page"><div class="shell">
     <header class="topbar"><a class="logo" href="index.html">校园闲置铺</a><nav class="nav-actions"><a class="btn" href="index.html">返回首页</a></nav></header>
     <main class="section two-col">
-      <section class="card yellow"><h1>登录</h1><p class="lead">登录后可以发布商品、下单、查看订单和评分。</p></section>
-      <form class="form" action="profile.html">
-        <label>账号<input required placeholder="手机号 / 邮箱 / 校园账号"></label>
-        <label>密码<input required type="password" placeholder="请输入密码"></label>
+      <section class="card yellow"><h1>用户登录</h1><p class="lead">登录后可以发布商品、模拟线上支付、查看订单流程和提交争议。</p></section>
+      <form class="form" id="loginForm">
+        <label>邮箱账号<input name="email" required type="email" placeholder="例如：student@example.com"></label>
+        <label>昵称<input name="nickname" required placeholder="例如：李同学"></label>
+        <label>手机号<input name="phone" required placeholder="例如：13800002030"></label>
+        <label>微信号<input name="wechat" required placeholder="例如：scc-student"></label>
         <button class="btn primary full" type="submit">登录</button>
-        <a class="btn full" href="profile.html">演示登录</a>
       </form>
     </main>
   </div></div>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/app.js"></script>
 </body>
 </html>
