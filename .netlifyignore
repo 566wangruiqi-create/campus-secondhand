@@ -1,0 +1,11 @@
+server/
+database/
+.git/
+node_modules/
+server/node_modules/
+.env
+server/.env
+*.log
+.DS_Store
+dist/
+build/
