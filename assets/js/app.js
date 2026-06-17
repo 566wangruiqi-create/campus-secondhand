@@ -77,6 +77,34 @@ async function supabaseFetchOr(path, fallback) {
   }
 }
 
+const API_BASE_URL = "http://localhost:3000/api";
+
+function currentToken() {
+  return localStorage.getItem("campus_token") || "";
+}
+
+async function apiFetch(path, options = {}) {
+  const token = currentToken();
+  const headers = {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(options.headers || {})
+  };
+  const body = options.body && typeof options.body !== "string"
+    ? JSON.stringify(options.body)
+    : options.body;
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    ...options,
+    headers,
+    body
+  });
+  const result = await response.json().catch(() => null);
+  if (!response.ok || result?.success === false) {
+    throw new Error(result?.message || "接口请求失败");
+  }
+  return result?.data;
+}
+
 function qs(name) {
   return new URLSearchParams(location.search).get(name);
 }
@@ -115,21 +143,27 @@ function currentAdmin() {
   }
 }
 
-function saveUser(user) {
+function saveUser(user, token) {
+  if (token) localStorage.setItem("campus_token", token);
   localStorage.setItem("campus_user", JSON.stringify(user));
+  localStorage.removeItem("campus_admin");
   updateNavUser();
 }
 
-function saveAdmin(admin) {
+function saveAdmin(admin, token) {
+  if (token) localStorage.setItem("campus_token", token);
   localStorage.setItem("campus_admin", JSON.stringify(admin));
+  localStorage.removeItem("campus_user");
 }
 
 function logoutUser() {
+  localStorage.removeItem("campus_token");
   localStorage.removeItem("campus_user");
   location.href = "index.html";
 }
 
 function logoutAdmin() {
+  localStorage.removeItem("campus_token");
   localStorage.removeItem("campus_admin");
   location.href = "admin-login.html";
 }
@@ -144,16 +178,20 @@ function requireUser(nextUrl = location.pathname.split("/").pop() + location.sea
 async function ensureCurrentUser(nextUrl) {
   const user = requireUser(nextUrl);
   if (!user) return null;
-  if (!hasSupabaseConfig()) return user;
-  const rows = await supabaseFetchOr(`user?user_id=eq.${user.user_id}&status=eq.1&select=*`, []);
-  if (rows[0]) {
-    saveUser(rows[0]);
-    return rows[0];
+  try {
+    const freshUser = normalizeApiUser(await apiFetch("/auth/me"));
+    if (freshUser?.role === "admin") {
+      throw new Error("当前账号不是普通用户。");
+    }
+    saveUser(freshUser);
+    return freshUser;
+  } catch (error) {
+    localStorage.removeItem("campus_token");
+    localStorage.removeItem("campus_user");
+    alert("当前登录用户已不存在或被禁用，请重新登录。");
+    location.href = `login.html?next=${encodeURIComponent(nextUrl || "index.html")}`;
+    return null;
   }
-  localStorage.removeItem("campus_user");
-  alert("当前登录用户已不存在或被禁用，请重新登录。");
-  location.href = `login.html?next=${encodeURIComponent(nextUrl || "index.html")}`;
-  return null;
 }
 
 function requireAdmin() {
@@ -166,16 +204,20 @@ function requireAdmin() {
 async function ensureCurrentAdmin() {
   const admin = requireAdmin();
   if (!admin) return null;
-  if (!hasSupabaseConfig()) return admin;
-  const rows = await supabaseFetchOr(`admin?admin_id=eq.${admin.admin_id}&select=*`, []);
-  if (rows[0]) {
-    saveAdmin(rows[0]);
-    return rows[0];
+  try {
+    const freshAdmin = normalizeApiUser(await apiFetch("/auth/me"));
+    if (freshAdmin?.role !== "admin") {
+      throw new Error("当前账号不是管理员。");
+    }
+    saveAdmin(freshAdmin);
+    return freshAdmin;
+  } catch (error) {
+    localStorage.removeItem("campus_token");
+    localStorage.removeItem("campus_admin");
+    alert("管理员登录状态已失效，请重新登录。");
+    location.href = "admin-login.html";
+    return null;
   }
-  localStorage.removeItem("campus_admin");
-  alert("管理员登录状态已失效，请重新登录。");
-  location.href = "admin-login.html";
-  return null;
 }
 
 function categoryById(id) {
@@ -227,6 +269,124 @@ function normalizeOrder(row, goodsMap = new Map(), users = new Map()) {
   };
 }
 
+const goodsStatusToNumber = {
+  pending: 0,
+  available: 1,
+  locked: 2,
+  sold: 3,
+  removed: 4,
+  rejected: 5
+};
+
+const goodsStatusToApi = {
+  0: "pending",
+  1: "available",
+  2: "locked",
+  3: "sold",
+  4: "removed",
+  5: "rejected"
+};
+
+const orderStatusToNumber = {
+  waiting_seller_place: 1,
+  seller_placed: 2,
+  buyer_received: 3,
+  completed: 4,
+  disputed: 5,
+  cancelled: 6
+};
+
+const orderStatusToApi = {
+  1: "waiting_seller_place",
+  2: "seller_placed",
+  3: "buyer_received",
+  4: "completed",
+  5: "disputed",
+  6: "cancelled"
+};
+
+const disputeStatusToNumber = {
+  pending: 0,
+  processing: 1,
+  resolved: 2,
+  rejected: 3
+};
+
+const disputeStatusToApi = {
+  0: "pending",
+  1: "processing",
+  2: "resolved",
+  3: "rejected"
+};
+
+function normalizeApiUser(row) {
+  if (!row) return null;
+  const status = row.status === "disabled" ? 0 : 1;
+  return {
+    ...row,
+    user_id: row.id,
+    admin_id: row.id,
+    nickname: row.name || row.username,
+    real_name: row.name || row.username,
+    wechat: row.wechat || "",
+    status
+  };
+}
+
+function normalizeApiGoods(row) {
+  if (!row) return null;
+  const status = typeof row.status === "number" ? row.status : goodsStatusToNumber[row.status] ?? 0;
+  return {
+    ...row,
+    goods_id: row.id,
+    goods_name: row.title || row.goods_name,
+    original_price: row.original_price ?? null,
+    degree: row.degree || "未填写",
+    location: row.pickup_location || row.location || "",
+    status,
+    publish_time: row.created_at || row.publish_time,
+    update_time: row.updated_at || row.update_time,
+    seller_name: row.seller_name || "校园用户",
+    seller_phone: row.seller_phone || row.contact || "",
+    seller_wechat: row.seller_wechat || "",
+    seller_score: 5
+  };
+}
+
+function normalizeApiOrder(row) {
+  if (!row) return null;
+  const status = typeof row.status === "number" ? row.status : orderStatusToNumber[row.status] ?? 1;
+  return {
+    ...row,
+    order_id: row.id,
+    order_no: row.order_no || `ORD${String(row.id).padStart(6, "0")}`,
+    goods_name: row.goods_title || row.goods_name || "订单商品",
+    amount: Number(row.price ?? row.amount ?? 0),
+    status,
+    place_location: row.place_location || "",
+    buyer_phone: row.buyer_contact || "",
+    buyer_wechat: "",
+    seller_phone: row.seller_contact || "",
+    seller_wechat: "",
+    create_time: row.created_at || row.create_time,
+    finish_time: row.finish_time || ""
+  };
+}
+
+function normalizeApiDispute(row) {
+  if (!row) return null;
+  const status = typeof row.status === "number" ? row.status : disputeStatusToNumber[row.status] ?? 0;
+  return {
+    ...row,
+    dispute_id: row.id,
+    user_id: row.complainant_id,
+    status,
+    result: row.admin_reply || "",
+    create_time: row.created_at || row.create_time,
+    handle_time: row.updated_at || row.handle_time
+  };
+}
+
 function applyGoodsSort(items, sortValue) {
   const sorted = [...items];
   const byTime = (item) => new Date(item.publish_time || 0).getTime();
@@ -244,76 +404,66 @@ function makeNo() {
 }
 
 const db = {
-  async login({ email, nickname, phone, wechat }) {
+  async login({ email, password }) {
     const username = email.trim();
-    if (!hasSupabaseConfig()) {
-      const user = { user_id: Date.now(), username, email, nickname, phone, wechat, status: 1 };
-      saveUser(user);
-      return user;
+    let result;
+    try {
+      result = await apiFetch("/auth/login", {
+        method: "POST",
+        body: {
+          username,
+          password: password || "123456"
+        }
+      });
+    } catch (error) {
+      if (!username.includes("@")) throw error;
+      result = await apiFetch("/auth/login", {
+        method: "POST",
+        body: {
+          username: username.split("@")[0],
+          password: password || "123456"
+        }
+      });
     }
-    const existing = await supabaseFetch(`user?username=eq.${encodeURIComponent(username)}&select=*`);
-    const user = existing[0] || (await supabaseFetch("user", {
-      method: "POST",
-      headers: { Prefer: "return=representation" },
-      body: JSON.stringify({
-        username,
-        password: "demo",
-        nickname,
-        real_name: nickname,
-        phone,
-        wechat,
-        email,
-        status: 1
-      })
-    }))[0];
-    if (Number(user.status) !== 1) throw new Error("该用户已被禁用，不能登录。");
-    saveUser(user);
+    const user = normalizeApiUser(result.user);
+    saveUser(user, result.token);
     return user;
   },
 
   async adminLogin({ username, password }) {
-    if (!hasSupabaseConfig()) {
-      if ((username || "").trim() !== "admin@example.com") throw new Error("管理员账号不存在。");
-      saveAdmin(mockAdmin);
-      return mockAdmin;
-    }
-    const rows = await supabaseFetch(`admin?username=eq.${encodeURIComponent(username.trim())}&password=eq.${encodeURIComponent(password.trim())}&select=*`);
-    if (!rows[0]) throw new Error("管理员账号或密码错误。默认账号 admin@example.com，密码 admin123。");
-    saveAdmin(rows[0]);
-    return rows[0];
+    const result = await apiFetch("/auth/login", {
+      method: "POST",
+      body: {
+        username: username.trim(),
+        password: password.trim()
+      }
+    });
+    const admin = normalizeApiUser(result.user);
+    if (admin.role !== "admin") throw new Error("当前账号不是管理员。");
+    saveAdmin(admin, result.token);
+    return admin;
   },
 
   async goods(filters = {}) {
     const keyword = filters.keyword?.trim();
-    if (!hasSupabaseConfig()) {
-      const users = await loadUsersMap();
-      const items = mockGoods.map((item) => normalizeGoods(item, users)).filter((item) => {
-        const visible = filters.includeAll || Number(item.status) === 1;
-        return visible
-          && (!filters.category_id || String(item.category_id) === String(filters.category_id))
+    if (filters.includeAll && document.body.dataset.adminPage) {
+      const rows = await apiFetch("/admin/goods");
+      const items = rows.map(normalizeApiGoods).filter((item) => {
+        return (!filters.category_id || String(item.category_id) === String(filters.category_id))
           && (!keyword || item.goods_name.includes(keyword) || categoryName(item.category_id).includes(keyword));
       });
       return applyGoodsSort(items, filters.sort);
     }
-    const rows = await supabaseFetchOr("goods?select=*&order=publish_time.desc", []);
-    const users = await loadUsersMap();
-    const items = rows.map((row) => normalizeGoods(row, users)).filter((item) => {
-      const visible = filters.includeAll || Number(item.status) === 1;
-      return visible
-        && (!filters.category_id || String(item.category_id) === String(filters.category_id))
-        && (!keyword || item.goods_name.includes(keyword) || categoryName(item.category_id).includes(keyword));
-    });
-    return applyGoodsSort(items, filters.sort);
+    const params = new URLSearchParams();
+    if (filters.includeAll) params.set("include_all", "true");
+    if (filters.category_id) params.set("category_id", filters.category_id);
+    if (keyword) params.set("keyword", keyword);
+    const rows = await apiFetch(`/goods${params.toString() ? `?${params}` : ""}`);
+    return applyGoodsSort(rows.map(normalizeApiGoods), filters.sort);
   },
 
   async goodsOne(id) {
-    if (!hasSupabaseConfig()) {
-      const users = await loadUsersMap();
-      return normalizeGoods(mockGoods.find((item) => String(item.goods_id) === String(id)) || mockGoods[0], users);
-    }
-    const rows = await supabaseFetchOr(`goods?goods_id=eq.${id}&select=*`, []);
-    const users = await loadUsersMap();
-    return rows[0] ? normalizeGoods(rows[0], users) : null;
+    return normalizeApiGoods(await apiFetch(`/goods/${id}`));
   },
 
   async createGoods(data) {
@@ -321,26 +471,19 @@ const db = {
     if (!user) return null;
     const category = categoryByQuery(data.category);
     const row = {
-      seller_id: user.user_id,
       category_id: category.id,
-      goods_name: data.goods_name,
+      title: data.goods_name,
       description: data.description,
       price: Number(data.price),
-      original_price: data.original_price ? Number(data.original_price) : null,
-      degree: data.degree,
-      location: data.location,
-      status: 0
+      image_url: "",
+      pickup_location: data.location,
+      contact: [user.phone, user.wechat].filter(Boolean).join(" / ")
     };
-    if (!hasSupabaseConfig()) {
-      alert("演示模式：商品已提交，状态为待审核。");
-      return row;
-    }
-    const created = await supabaseFetch("goods", {
+    const created = await apiFetch("/goods", {
       method: "POST",
-      headers: { Prefer: "return=representation" },
-      body: JSON.stringify(row)
+      body: row
     });
-    return created[0];
+    return normalizeApiGoods(created);
   },
 
   async createPaymentAndOrder(goods) {
@@ -354,72 +497,30 @@ const db = {
       alert("该商品当前不可购买。");
       return;
     }
-    if (!hasSupabaseConfig()) {
-      alert("演示模式：已模拟支付成功并生成订单。");
-      location.href = "profile.html";
-      return;
-    }
-    const users = await loadUsersMap();
-    const seller = users.get(goods.seller_id);
-    const paymentNo = `PAY${makeNo()}`;
-    const orderNo = `ORD${makeNo()}`;
-    const payment = (await supabaseFetch("payment", {
+    const order = normalizeApiOrder(await apiFetch("/orders", {
       method: "POST",
-      headers: { Prefer: "return=representation" },
-      body: JSON.stringify({
-        payment_no: paymentNo,
-        buyer_id: buyer.user_id,
+      body: {
         goods_id: goods.goods_id,
-        pay_amount: goods.price,
-        pay_method: "模拟支付",
-        pay_status: 1,
-        pay_time: new Date().toISOString()
-      })
-    }))[0];
-    const order = (await supabaseFetch("orders", {
-      method: "POST",
-      headers: { Prefer: "return=representation" },
-      body: JSON.stringify({
-        order_no: orderNo,
-        goods_id: goods.goods_id,
-        buyer_id: buyer.user_id,
-        seller_id: goods.seller_id,
-        payment_id: payment.payment_id,
-        amount: goods.price,
-        status: 1,
-        place_location: goods.location,
-        buyer_phone: buyer.phone,
-        buyer_wechat: buyer.wechat,
-        seller_phone: seller?.phone || "",
-        seller_wechat: seller?.wechat || ""
-      })
-    }))[0];
-    await supabaseFetch(`payment?payment_id=eq.${payment.payment_id}`, {
-      method: "PATCH",
-      body: JSON.stringify({ order_no: orderNo })
-    });
-    await supabaseFetch(`goods?goods_id=eq.${goods.goods_id}`, {
-      method: "PATCH",
-      body: JSON.stringify({ status: 2, update_time: new Date().toISOString() })
-    });
+        buyer_contact: [buyer.phone, buyer.wechat].filter(Boolean).join(" / ")
+      }
+    }));
     location.href = `order-detail.html?id=${order.order_id}`;
   },
 
   async orders(filters = {}) {
-    if (!hasSupabaseConfig()) return [];
-    const rows = await supabaseFetchOr("orders?select=*&order=create_time.desc", []);
-    const [goodsMap, users] = await Promise.all([loadGoodsMap(), loadUsersMap()]);
-    return rows.map((row) => normalizeOrder(row, goodsMap, users)).filter((order) => {
-      return (!filters.buyer_id || Number(order.buyer_id) === Number(filters.buyer_id))
-        && (!filters.seller_id || Number(order.seller_id) === Number(filters.seller_id));
-    });
+    if (document.body.dataset.adminPage) {
+      const rows = await apiFetch("/admin/orders");
+      return rows.map(normalizeApiOrder);
+    }
+    const params = new URLSearchParams();
+    if (filters.buyer_id) params.set("buyer_id", filters.buyer_id);
+    if (filters.seller_id) params.set("seller_id", filters.seller_id);
+    const rows = await apiFetch(`/orders${params.toString() ? `?${params}` : ""}`);
+    return rows.map(normalizeApiOrder);
   },
 
   async order(id) {
-    if (!hasSupabaseConfig()) return null;
-    const rows = await supabaseFetchOr(`orders?order_id=eq.${id}&select=*`, []);
-    const [goodsMap, users] = await Promise.all([loadGoodsMap(), loadUsersMap()]);
-    return rows[0] ? normalizeOrder(rows[0], goodsMap, users) : null;
+    return normalizeApiOrder(await apiFetch(`/orders/${id}`));
   },
 
   async updateOrderStatus(order, nextStatus) {
@@ -435,98 +536,74 @@ const db = {
     }
     if (nextStatus === 2 && Number(order.status) !== 1) return;
     if (nextStatus === 4 && Number(order.status) !== 2) return;
-    if (!hasSupabaseConfig()) return;
-    const patch = { status: nextStatus };
+    const patch = { status: orderStatusToApi[nextStatus] };
     if (nextStatus === 2) {
       const place = prompt("请填写商品实际放置地点", order.place_location || "");
       if (!place) return;
       patch.place_location = place;
     }
-    if (nextStatus === 4) patch.finish_time = new Date().toISOString();
-    await supabaseFetch(`orders?order_id=eq.${order.order_id}`, {
+    await apiFetch(`/orders/${order.order_id}/status`, {
       method: "PATCH",
-      body: JSON.stringify(patch)
+      body: patch
     });
-    if (nextStatus === 4) {
-      await supabaseFetch(`goods?goods_id=eq.${order.goods_id}`, {
-        method: "PATCH",
-        body: JSON.stringify({ status: 3, update_time: new Date().toISOString() })
-      });
-    }
     location.reload();
   },
 
   async submitDispute(data) {
     const user = await ensureCurrentUser(`dispute.html?order=${data.order_id}`);
-    if (!user || !hasSupabaseConfig()) return;
-    await supabaseFetch("dispute", {
+    if (!user) return;
+    await apiFetch("/disputes", {
       method: "POST",
-      headers: { Prefer: "return=representation" },
-      body: JSON.stringify({
+      body: {
         order_id: Number(data.order_id),
-        user_id: user.user_id,
         reason: data.reason,
-        evidence: data.evidence || "",
-        status: 0
-      })
-    });
-    await supabaseFetch(`orders?order_id=eq.${data.order_id}`, {
-      method: "PATCH",
-      body: JSON.stringify({ status: 5 })
+        evidence: data.evidence || ""
+      }
     });
   },
 
   async users() {
-    if (!hasSupabaseConfig()) return mockUsers;
-    return supabaseFetchOr("user?select=*&order=create_time.desc", []);
+    const rows = await apiFetch("/admin/users");
+    return rows.map(normalizeApiUser);
   },
 
   async admins() {
-    if (!hasSupabaseConfig()) return [mockAdmin];
-    return supabaseFetchOr("admin?select=*", []);
+    return (await db.users()).filter((user) => user.role === "admin");
   },
 
   async disputes() {
-    if (!hasSupabaseConfig()) return [];
-    return supabaseFetchOr("dispute?select=*&order=create_time.desc", []);
+    const rows = await apiFetch("/admin/disputes");
+    return rows.map(normalizeApiDispute);
   },
 
   async updateGoodsStatus(goodsId, status) {
-    if (!hasSupabaseConfig()) return;
-    await supabaseFetch(`goods?goods_id=eq.${goodsId}`, {
+    await apiFetch(`/goods/${goodsId}/status`, {
       method: "PATCH",
-      body: JSON.stringify({ status, update_time: new Date().toISOString() })
+      body: { status: goodsStatusToApi[status] }
     });
   },
 
   async updateDispute(disputeId, status, result) {
     const admin = await ensureCurrentAdmin();
-    if (!admin || !hasSupabaseConfig()) return;
-    await supabaseFetch(`dispute?dispute_id=eq.${disputeId}`, {
+    if (!admin) return;
+    await apiFetch(`/admin/disputes/${disputeId}`, {
       method: "PATCH",
-      body: JSON.stringify({
-        status,
-        result,
-        admin_id: admin.admin_id,
-        handle_time: new Date().toISOString()
-      })
+      body: {
+        status: disputeStatusToApi[status],
+        admin_reply: result
+      }
     });
   },
 
   async dashboardStats() {
-    const [users, goods, orders, disputes] = await Promise.all([
-      db.users(),
-      db.goods({ includeAll: true }),
-      db.orders(),
-      db.disputes()
-    ]);
+    const stats = await apiFetch("/admin/dashboard");
     return {
-      userCount: users.length,
-      goodsCount: goods.length,
-      activeGoodsCount: goods.filter((item) => Number(item.status) === 1).length,
-      tradingGoodsCount: goods.filter((item) => Number(item.status) === 2).length,
-      completedOrderCount: orders.filter((item) => Number(item.status) === 4).length,
-      disputeCount: disputes.length
+      userCount: Number(stats.users?.users || 0),
+      goodsCount: Number(stats.goods?.total || 0),
+      activeGoodsCount: Number(stats.goods?.available || 0),
+      tradingGoodsCount: Number(stats.goods?.locked || 0),
+      completedOrderCount: Number(stats.orders?.completed || 0),
+      disputeCount: Number(stats.disputes?.total || 0)
     };
   }
 };
@@ -768,6 +845,14 @@ async function initOrderDetailPage() {
 
 async function initLoginPage() {
   const form = document.querySelector("#loginForm");
+  const accountInput = form?.querySelector("[name='email']");
+  if (accountInput) {
+    accountInput.type = "text";
+    accountInput.placeholder = "例如：user1";
+  }
+  form?.querySelectorAll("[name='nickname'], [name='phone'], [name='wechat']").forEach((input) => {
+    input.required = false;
+  });
   form?.addEventListener("submit", async (event) => {
     event.preventDefault();
     try {
@@ -781,6 +866,11 @@ async function initLoginPage() {
 
 async function initAdminLoginPage() {
   const form = document.querySelector("#adminLoginForm");
+  const accountInput = form?.querySelector("[name='username']");
+  if (accountInput) {
+    accountInput.type = "text";
+    accountInput.placeholder = "admin";
+  }
   form?.addEventListener("submit", async (event) => {
     event.preventDefault();
     try {
