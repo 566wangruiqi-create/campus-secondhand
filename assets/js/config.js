@@ -1,4 +1,3 @@
-window.CAMPUS_SUPABASE = {
-  url: "https://tsdbfeajuwdfahuvqnit.supabase.co",
-  anonKey: "sb_publishable_VkkmmeEBe8aDqv_CuviRxA_9l0Uxx6A"
+window.CAMPUS_API = {
+  baseUrl: "http://localhost:3000/api"
 };

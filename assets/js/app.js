@@ -45,66 +45,6 @@ const mockGoods = [
   { goods_id: 2, seller_id: 1, category_id: 2, goods_name: "机械键盘", description: "按键正常，适合宿舍学习。", price: 99, original_price: 199, degree: "九成新", location: "北校区二号宿舍大厅", status: 1, view_count: 0, publish_time: "2026-06-02T08:00:00Z" }
 ];
 
-function cfg() {
-  return window.CAMPUS_SUPABASE || {};
-}
-
-function hasSupabaseConfig() {
-  return Boolean(cfg().url && cfg().anonKey);
-}
-
-async function supabaseFetch(path, options = {}) {
-  const response = await fetch(`${cfg().url}/rest/v1/${path}`, {
-    ...options,
-    headers: {
-      apikey: cfg().anonKey,
-      Authorization: `Bearer ${cfg().anonKey}`,
-      "Content-Type": "application/json",
-      ...(options.headers || {})
-    }
-  });
-  if (!response.ok) throw new Error(await response.text());
-  if (response.status === 204) return null;
-  return response.json();
-}
-
-async function supabaseFetchOr(path, fallback) {
-  try {
-    return await supabaseFetch(path);
-  } catch (error) {
-    console.warn("Supabase request failed:", path, error);
-    return fallback;
-  }
-}
-
-const API_BASE_URL = "http://localhost:3000/api";
-
-function currentToken() {
-  return localStorage.getItem("campus_token") || "";
-}
-
-async function apiFetch(path, options = {}) {
-  const token = currentToken();
-  const headers = {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(options.headers || {})
-  };
-  const body = options.body && typeof options.body !== "string"
-    ? JSON.stringify(options.body)
-    : options.body;
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers,
-    body
-  });
-  const result = await response.json().catch(() => null);
-  if (!response.ok || result?.success === false) {
-    throw new Error(result?.message || "接口请求失败");
-  }
-  return result?.data;
-}
-
 function qs(name) {
   return new URLSearchParams(location.search).get(name);
 }
@@ -233,9 +173,7 @@ function categoryName(id) {
 }
 
 async function loadUsersMap() {
-  if (!hasSupabaseConfig()) return new Map(mockUsers.map((item) => [item.user_id, item]));
-  const users = await supabaseFetchOr("user?select=*", []);
-  return new Map(users.map((item) => [item.user_id, item]));
+  return new Map(mockUsers.map((item) => [item.user_id, item]));
 }
 
 async function loadGoodsMap() {
