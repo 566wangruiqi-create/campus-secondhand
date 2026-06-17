@@ -1,12 +1,12 @@
 const categories = [
-  { id: 1, slug: "textbooks", name: "教材资料", icon: "书" },
-  { id: 2, slug: "digital", name: "数码电子", icon: "机" },
-  { id: 3, slug: "living", name: "生活用品", icon: "用" },
-  { id: 4, slug: "clothing", name: "服饰鞋包", icon: "包" },
-  { id: 5, slug: "sports", name: "运动户外", icon: "动" },
-  { id: 6, slug: "furniture", name: "宿舍家具", icon: "宿" },
-  { id: 7, slug: "tools", name: "文具工具", icon: "笔" },
-  { id: 8, slug: "other", name: "其他闲置", icon: "它" }
+  { id: 1, slug: "textbooks", name: "教材资料", icon: "📚" },
+  { id: 2, slug: "digital", name: "数码电子", icon: "🎧" },
+  { id: 3, slug: "living", name: "生活用品", icon: "🧺" },
+  { id: 4, slug: "clothing", name: "服饰鞋包", icon: "🎒" },
+  { id: 5, slug: "sports", name: "运动户外", icon: "🏸" },
+  { id: 6, slug: "furniture", name: "宿舍家具", icon: "🪑" },
+  { id: 7, slug: "tools", name: "文具工具", icon: "✏️" },
+  { id: 8, slug: "other", name: "其他闲置", icon: "✨" }
 ];
 
 const goodsStatus = {
@@ -911,20 +911,20 @@ async function initDisputePage() {
   });
 }
 
-function initScrollButtons() {
-  document.querySelectorAll("[data-scroll]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const scroller = document.querySelector(".category-scroll");
-      if (!scroller) return;
-      scroller.scrollBy({ left: button.dataset.scroll === "right" ? 320 : -320, behavior: "smooth" });
-    });
+function initCategoryTrack() {
+  document.querySelectorAll(".categories-track").forEach((track) => {
+    track.addEventListener("wheel", (event) => {
+      if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+      event.preventDefault();
+      track.scrollBy({ left: event.deltaY, behavior: "smooth" });
+    }, { passive: false });
   });
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
   updateNavUser();
   renderCategories();
-  initScrollButtons();
+  initCategoryTrack();
   await initLoginPage();
   await initAdminLoginPage();
   await initAdminPages();
