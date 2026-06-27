@@ -14,6 +14,7 @@
       <form class="form" id="searchForm">
         <label>关键词<input id="keyword" placeholder="输入商品名称或分类"></label>
         <label>分类<select id="category"><option value="">全部分类</option><option value="1">教材资料</option><option value="2">数码电子</option><option value="3">生活用品</option><option value="4">服饰鞋包</option><option value="5">运动户外</option><option value="6">宿舍家具</option><option value="7">文具工具</option><option value="8">其他闲置</option></select></label>
+        <div class="form-row"><label>最低价<input id="minPrice" type="number" min="0" step="1" placeholder="0"></label><label>最高价<input id="maxPrice" type="number" min="0" step="1" placeholder="不限"></label></div>
         <label>排序<select id="sort"><option value="time-desc">发布时间：最新优先</option><option value="time-asc">发布时间：最早优先</option><option value="price-asc">价格：从低到高</option><option value="price-desc">价格：从高到低</option></select></label>
         <button class="btn primary" type="submit">搜索</button>
       </form>

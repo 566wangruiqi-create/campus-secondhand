@@ -20,7 +20,7 @@ async function authenticate(req, res, next) {
 
   try {
     const [rows] = await pool.execute(
-      `SELECT id, username, name, phone, email, role, status
+      `SELECT id, username, name, phone, email, wechat, role, status
        FROM users
        WHERE id = ?
        LIMIT 1`,

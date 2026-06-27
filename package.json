@@ -1,0 +1,13 @@
+{
+  "name": "campus-secondhand",
+  "version": "2.0.0",
+  "private": true,
+  "description": "可部署、可多人使用的校园二手交易平台",
+  "scripts": {
+    "start": "npm --prefix server start",
+    "dev": "npm --prefix server run dev"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  }
+}

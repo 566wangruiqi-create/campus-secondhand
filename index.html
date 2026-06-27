@@ -6,7 +6,7 @@
   <title>校园闲置铺</title>
   <link rel="stylesheet" href="assets/css/styles.css">
 </head>
-<body>
+<body data-page="home">
   <div class="page">
     <div class="shell">
       <header class="topbar">
@@ -21,15 +21,48 @@
       <main>
         <section class="hero">
           <div class="hero-copy">
-            <h1><span class="chip">校园闲置铺</span><br><span class="chip alt">苏州城市学院</span></h1>
-            <p class="lead">校园闲置铺，一个发现校园里的好物的地方</p>
+            <p class="eyebrow">SUSTAINABLE CAMPUS MARKET</p>
+            <h1><span class="chip">闲置别吃灰</span><br><span class="chip alt">让它去找新同学</span></h1>
+            <p class="lead hero-message">
+              <span>苏州城市学院校内二手交易社区</span>
+              <span>线上交易 · 生成订单 · 线下取货</span>
+              <span>流程可追踪</span>
+            </p>
+            <form class="hero-search" action="search.html">
+              <input name="q" aria-label="搜索商品" placeholder="搜教材、耳机、宿舍好物…">
+              <button class="btn primary" type="submit">开始淘好物</button>
+            </form>
           </div>
         </section>
+        <section class="home-stats" data-home-stats></section>
         <section class="section">
           <div class="section-head">
             <h2 class="title-box">分类频道</h2>
           </div>
           <div class="categories-track" data-categories></div>
+        </section>
+        <section class="section">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">JUST DROPPED</p>
+              <h2 class="title-box">最近上新</h2>
+            </div>
+            <a class="btn" href="search.html">查看全部</a>
+          </div>
+          <div class="grid" data-home-products data-products></div>
+        </section>
+        <section class="section highlights-section">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">WHY CAMPUS MARKET</p>
+              <h2 class="title-box">我们的亮点</h2>
+            </div>
+          </div>
+          <div class="trust-grid">
+            <article class="card yellow"><span class="step-no">01</span><h3>平台统一发布展示</h3><p>商品统一提交、审核、分类和展示，信息更完整，查找校园好物更高效。</p></article>
+            <article class="card red"><span class="step-no">02</span><h3>生成线上订单，流程清晰</h3><p>下单后自动生成订单并锁定商品，放置、取货、完成等节点清晰可查。</p></article>
+            <article class="card violet"><span class="step-no">03</span><h3>平台监管</h3><p>平台审核商品、跟踪订单、处理争议，并通过交易评价沉淀用户信用。</p></article>
+          </div>
         </section>
       </main>
     </div>

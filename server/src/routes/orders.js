@@ -17,6 +17,7 @@ const orderSelect = `
     o.price,
     o.buyer_contact,
     o.seller_contact,
+    o.place_location,
     o.status,
     o.created_at,
     o.updated_at,
@@ -196,7 +197,7 @@ router.get("/:id", authenticate, asyncHandler(async (req, res) => {
 }));
 
 router.patch("/:id/status", authenticate, asyncHandler(async (req, res) => {
-  const { status } = req.body || {};
+  const { status, place_location } = req.body || {};
 
   if (!isAllowed(status, ORDER_STATUSES)) {
     throw httpError(400, "订单状态不合法");
@@ -219,11 +220,27 @@ router.patch("/:id/status", authenticate, asyncHandler(async (req, res) => {
 
     ensureStatusPermission(currentOrder, req.user, status);
 
+    const transitions = {
+      waiting_seller_place: ["seller_placed", "cancelled", "disputed"],
+      seller_placed: ["buyer_received", "completed", "cancelled", "disputed"],
+      buyer_received: ["completed", "disputed"],
+      disputed: ["completed", "cancelled"],
+      completed: [],
+      cancelled: []
+    };
+    if (!transitions[currentOrder.status]?.includes(status) && req.user.role !== "admin") {
+      throw httpError(400, "当前订单状态不能执行该操作");
+    }
+
+    if (status === "seller_placed" && !String(place_location || "").trim()) {
+      throw httpError(400, "请填写商品放置地点");
+    }
+
     await connection.execute(
       `UPDATE orders
-       SET status = ?
+       SET status = ?, place_location = COALESCE(?, place_location), updated_at = CURRENT_TIMESTAMP
        WHERE id = ?`,
-      [status, req.params.id]
+      [status, String(place_location || "").trim() || null, req.params.id]
     );
 
     if (status === "completed") {

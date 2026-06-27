@@ -2,11 +2,11 @@ USE campus_secondhand;
 
 SET NAMES utf8mb4;
 
-INSERT INTO users (id, username, password, name, phone, email, role, status, created_at, updated_at) VALUES
-  (1, 'admin', '123456', '系统管理员', '13800000000', 'admin@campus.local', 'admin', 'active', '2026-06-01 09:00:00', '2026-06-01 09:00:00'),
-  (2, 'user1', '123456', '李同学', '13800001111', 'user1@campus.local', 'user', 'active', '2026-06-01 09:10:00', '2026-06-01 09:10:00'),
-  (3, 'user2', '123456', '王同学', '13800002222', 'user2@campus.local', 'user', 'active', '2026-06-01 09:20:00', '2026-06-01 09:20:00'),
-  (4, 'user3', '123456', '陈同学', '13800003333', 'user3@campus.local', 'user', 'active', '2026-06-01 09:30:00', '2026-06-01 09:30:00');
+INSERT INTO users (id, username, password, name, phone, email, wechat, role, status, created_at, updated_at) VALUES
+  (1, 'admin', '123456', '系统管理员', '13800000000', 'admin@campus.local', 'campus-admin', 'admin', 'active', '2026-06-01 09:00:00', '2026-06-01 09:00:00'),
+  (2, 'user1', '123456', '李同学', '13800001111', 'user1@campus.local', 'wx-user1', 'user', 'active', '2026-06-01 09:10:00', '2026-06-01 09:10:00'),
+  (3, 'user2', '123456', '王同学', '13800002222', 'user2@campus.local', 'wx-user2', 'user', 'active', '2026-06-01 09:20:00', '2026-06-01 09:20:00'),
+  (4, 'user3', '123456', '陈同学', '13800003333', 'user3@campus.local', 'wx-user3', 'user', 'active', '2026-06-01 09:30:00', '2026-06-01 09:30:00');
 
 INSERT INTO categories (id, name, sort_order, created_at) VALUES
   (1, '教材资料', 1, '2026-06-01 10:00:00'),

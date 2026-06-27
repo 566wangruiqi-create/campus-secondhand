@@ -12,12 +12,36 @@ router.use(authenticate, requireAdmin);
 
 router.get("/users", asyncHandler(async (req, res) => {
   const [rows] = await pool.execute(
-    `SELECT id, username, name, phone, email, role, status, created_at, updated_at
+    `SELECT id, username, name, phone, email, wechat, role, status, created_at, updated_at
      FROM users
      ORDER BY created_at DESC`
   );
 
   return success(res, rows);
+}));
+
+router.patch("/users/:id/status", asyncHandler(async (req, res) => {
+  const { status } = req.body || {};
+  if (!["active", "disabled"].includes(status)) {
+    throw httpError(400, "用户状态不合法");
+  }
+  if (Number(req.params.id) === Number(req.user.id)) {
+    throw httpError(400, "不能禁用当前管理员账号");
+  }
+
+  const [result] = await pool.execute(
+    "UPDATE users SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+    [status, req.params.id]
+  );
+  if (!result.affectedRows) {
+    throw httpError(404, "用户不存在");
+  }
+  await pool.execute(
+    `INSERT INTO admin_logs (admin_id, action, target_type, target_id, detail)
+     VALUES (?, 'update_user_status', 'users', ?, ?)`,
+    [req.user.id, req.params.id, `用户状态更新为 ${status}`]
+  );
+  return success(res, { id: Number(req.params.id), status });
 }));
 
 router.get("/goods", asyncHandler(async (req, res) => {
@@ -210,6 +234,18 @@ router.get("/dashboard", asyncHandler(async (req, res) => {
     reviews: reviewRows[0],
     payments: paymentRows[0]
   });
+}));
+
+router.get("/logs", asyncHandler(async (req, res) => {
+  const [rows] = await pool.execute(
+    `SELECT l.id, l.action, l.target_type, l.target_id, l.detail, l.created_at,
+            u.name AS admin_name
+     FROM admin_logs l
+     INNER JOIN users u ON u.id = l.admin_id
+     ORDER BY l.created_at DESC
+     LIMIT 100`
+  );
+  return success(res, rows);
 }));
 
 module.exports = router;

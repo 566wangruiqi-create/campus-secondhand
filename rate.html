@@ -6,11 +6,27 @@
   <title>交易完成 - 校园闲置铺</title>
   <link rel="stylesheet" href="assets/css/styles.css">
 </head>
-<body>
+<body data-page="rate">
   <div class="page"><div class="shell">
     <header class="topbar"><a class="logo" href="index.html">校园闲置铺</a><nav class="nav-actions"><a class="btn" href="profile.html">个人中心</a></nav></header>
-    <main class="section">
-      <section class="card yellow"><h1>交易完成</h1><p class="lead">最终版数据库不再单独设置评分表，完成交易记录会在个人中心和管理员后台同步显示。</p></section>
+    <main class="section two-col">
+      <section class="card violet" data-rate-summary><h1>评价交易</h1><p class="lead">认真评价会让下一位同学更放心。</p></section>
+      <form class="form" id="rateForm">
+        <input type="hidden" name="order_id">
+        <fieldset class="rating-field">
+          <legend>交易评分</legend>
+          <div class="star-rating" aria-label="选择 1 到 5 星评分">
+            <input id="rating-5" name="rating" type="radio" value="5" checked><label for="rating-5" title="5 星：非常满意">★</label>
+            <input id="rating-4" name="rating" type="radio" value="4"><label for="rating-4" title="4 星：比较满意">★</label>
+            <input id="rating-3" name="rating" type="radio" value="3"><label for="rating-3" title="3 星：符合预期">★</label>
+            <input id="rating-2" name="rating" type="radio" value="2"><label for="rating-2" title="2 星：有待改进">★</label>
+            <input id="rating-1" name="rating" type="radio" value="1"><label for="rating-1" title="1 星：体验不佳">★</label>
+          </div>
+          <p class="rating-hint" data-rating-hint>5 星 · 非常满意</p>
+        </fieldset>
+        <label>评价内容<textarea name="comment" maxlength="300" placeholder="描述沟通、商品状态或取货体验"></textarea></label>
+        <button class="btn primary full" type="submit">提交评价</button>
+      </form>
     </main>
   </div></div>
   <script src="assets/js/config.js"></script>

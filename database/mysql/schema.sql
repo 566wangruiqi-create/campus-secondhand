@@ -12,6 +12,7 @@ CREATE TABLE users (
   name VARCHAR(50) NOT NULL,
   phone VARCHAR(20),
   email VARCHAR(100),
+  wechat VARCHAR(80),
   role ENUM('user', 'admin') NOT NULL DEFAULT 'user',
   status ENUM('active', 'disabled') NOT NULL DEFAULT 'active',
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -39,10 +40,13 @@ CREATE TABLE goods (
   title VARCHAR(100) NOT NULL,
   description TEXT,
   price DECIMAL(10, 2) NOT NULL,
-  image_url VARCHAR(255),
+  original_price DECIMAL(10, 2),
+  degree VARCHAR(30),
+  image_url MEDIUMTEXT,
   pickup_location VARCHAR(120),
   contact VARCHAR(100),
   status ENUM('pending', 'available', 'locked', 'sold', 'removed', 'rejected') NOT NULL DEFAULT 'pending',
+  view_count INT UNSIGNED NOT NULL DEFAULT 0,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
@@ -68,6 +72,7 @@ CREATE TABLE orders (
   price DECIMAL(10, 2) NOT NULL,
   buyer_contact VARCHAR(100),
   seller_contact VARCHAR(100),
+  place_location VARCHAR(120),
   status ENUM(
     'waiting_seller_place',
     'seller_placed',
@@ -168,6 +173,25 @@ CREATE TABLE payments (
     FOREIGN KEY (user_id) REFERENCES users (id)
     ON UPDATE CASCADE
     ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE favorites (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  user_id BIGINT UNSIGNED NOT NULL,
+  goods_id BIGINT UNSIGNED NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_favorites_user_goods (user_id, goods_id),
+  KEY idx_favorites_user_id (user_id),
+  KEY idx_favorites_goods_id (goods_id),
+  CONSTRAINT fk_favorites_user
+    FOREIGN KEY (user_id) REFERENCES users (id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+  CONSTRAINT fk_favorites_goods
+    FOREIGN KEY (goods_id) REFERENCES goods (id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE admin_logs (
